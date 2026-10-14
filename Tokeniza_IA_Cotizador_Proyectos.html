@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Calculadora de tokens y cotizador de proyectos de IA con conversión Banxico, comparación de modelos y reporte exportable.">
+  <title>Tokeniza·IA — Cotizador de proyectos</title>
+  <style>
+    :root {
+      --cream:#FFF3E2; --ivory:#FBEEDB; --white:#FFF8EC; --ink:#263247; --muted:#657083;
+      --line:#E8E1D9; --rose:#F6B6C8; --lav:#CDB4DB; --sky:#A9D6E5; --mint:#BDE0C4;
+      --butter:#F9E79F; --peach:#F8C8B8; --coral:#F4A6A6; --navy:#263247;
+      --apricot:#F6D0A7; --sand:#ECD8BE; --blush:#F8D9D0; --honey:#F4D48B;
+      --shadow:0 16px 45px rgba(71,61,76,.10); --radius:22px; --small:14px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;background:radial-gradient(circle at 10% 0%,rgba(246,182,200,.35),transparent 30%),radial-gradient(circle at 95% 7%,rgba(248,200,184,.40),transparent 28%),linear-gradient(145deg,#FFF0DB,#F8E6DA 48%,#F4E3D8);background-attachment:fixed;color:var(--ink);font:15px/1.55 Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+    a{color:#3b6070}
+    .shell{width:min(1480px,calc(100% - 32px));margin:0 auto}
+    .topbar{position:sticky;top:0;z-index:20;background:rgba(251,226,207,.90);backdrop-filter:blur(18px);border-bottom:1px solid rgba(191,143,121,.22)}
+    .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:72px}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:850;letter-spacing:-.02em}
+    .brand-mark{display:grid;place-items:center;width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,var(--rose),var(--lav));box-shadow:0 8px 20px rgba(110,83,127,.18);font-size:20px}
+    .brand small{display:block;color:var(--muted);font-weight:600;letter-spacing:0;font-size:11px}
+    .top-actions{display:flex;flex-wrap:wrap;gap:9px}
+    .btn{border:0;border-radius:13px;padding:11px 15px;font-weight:760;color:var(--ink);background:#F9E4CB;box-shadow:0 5px 14px rgba(99,70,50,.10);transition:.18s transform,.18s box-shadow,.18s background}
+    .btn:hover{transform:translateY(-1px);box-shadow:0 8px 18px rgba(40,48,65,.12)}
+    .btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid rgba(73,129,151,.28);outline-offset:2px}
+    .btn.primary{background:var(--navy);color:#fff}
+    .btn.mint{background:var(--mint)} .btn.lav{background:#eadcf0} .btn.rose{background:#fbd5df}
+    .btn.danger{color:#793d4b;background:#fff1f3}
+    .hero{padding:58px 0 34px;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:7px 11px;border-radius:999px;background:rgba(189,224,196,.55);font-weight:760;font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+    h1{font-size:clamp(38px,6vw,70px);line-height:.98;letter-spacing:-.055em;margin:18px 0 16px;max-width:850px}
+    .gradient-text{background:linear-gradient(100deg,#8a5873,#516d88);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .lead{font-size:18px;color:#566174;max-width:760px;margin:0}
+    .hero-card{position:relative;overflow:hidden;background:linear-gradient(145deg,#F8D9D0,#F3D6B8);border:1px solid rgba(166,111,91,.15);border-radius:30px;padding:24px;box-shadow:var(--shadow);animation:floatCard 6s ease-in-out infinite}
+    .hero-card:before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;background:var(--butter);opacity:.5;right:-70px;top:-80px}
+    .mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;position:relative}
+    .mini{padding:16px;border-radius:17px;background:rgba(255,244,226,.78);border:1px solid rgba(171,122,103,.17);transition:.2s transform}.mini:hover{transform:translateY(-4px) rotate(-.4deg)}
+    .mini b{display:block;font-size:20px}.mini span{color:var(--muted);font-size:12px}
+    .workflow{display:flex;gap:8px;overflow:auto;padding:0 0 25px;scrollbar-width:thin}
+    .workflow a{white-space:nowrap;text-decoration:none;color:var(--ink);padding:9px 13px;border:1px solid rgba(170,120,98,.18);background:rgba(248,200,184,.60);border-radius:999px;font-weight:700;font-size:13px;transition:.18s transform,.18s background}.workflow a:nth-child(2n){background:rgba(249,231,159,.63)}.workflow a:hover{transform:translateY(-2px);background:var(--rose)}
+    .layout{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(390px,.92fr);gap:24px;align-items:start;padding-bottom:50px}
+    .stack{display:grid;gap:20px}
+    .card{background:rgba(255,238,219,.94);border:1px solid rgba(158,105,84,.13);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;transition:.25s transform,.25s box-shadow}.card:hover{box-shadow:0 19px 48px rgba(89,57,48,.14)}
+    #project{background:linear-gradient(145deg,#FAD9CA,#F8C8B8)}
+    #model{background:linear-gradient(145deg,#E7D4EB,#D7C0DF)}
+    #tokens{background:linear-gradient(145deg,#F8D9D0,#F7C6D1)}
+    #exchange{background:linear-gradient(145deg,#F9E9B9,#F3D79B)}
+    #results{background:linear-gradient(160deg,#F4D9C1,#E9CDD7)}
+    #sources{background:linear-gradient(145deg,#EAD5C0,#F6D9BF)}
+    .card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:22px 24px 14px}
+    .card-head h2{font-size:20px;margin:0 0 3px;letter-spacing:-.025em}.card-head p{margin:0;color:var(--muted);font-size:13px}
+    .step{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border-radius:12px;background:var(--lav);font-weight:850}
+    .card-body{padding:8px 24px 24px}
+    .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.wide{grid-column:1/-1}
+    label{display:block;font-weight:740;font-size:13px;margin-bottom:6px}
+    .hint{color:var(--muted);font-size:11px;font-weight:550;display:block;margin-top:5px}
+    input,select,textarea{width:100%;border:1px solid rgba(116,80,69,.22);background:#FFF1DF;color:var(--ink);border-radius:13px;padding:11px 12px;transition:.15s border,.15s box-shadow,.18s transform}
+    input:focus,select:focus,textarea:focus{background:#FFF7EA;transform:translateY(-1px)}
+    input:hover,select:hover,textarea:hover{border-color:#c8bdc6}
+    textarea{min-height:170px;resize:vertical}
+    .segmented{display:flex;gap:8px;flex-wrap:wrap}
+    .segmented button{border:1px solid var(--line);background:#F9E4CB;padding:8px 11px;border-radius:11px;font-weight:700;color:var(--muted)}
+    .segmented button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .drop{position:relative;border:2px dashed #b98978;background:linear-gradient(145deg,rgba(249,231,159,.56),rgba(248,200,184,.62));border-radius:22px;padding:0;text-align:left;transition:.22s transform,.22s border,.22s box-shadow;overflow:hidden}
+    .drop.drag{border-color:#8b5b68;background:#F8D9D0;transform:scale(1.01);box-shadow:0 14px 32px rgba(102,65,54,.13)}.drop input{display:none}.drop label{display:inline-flex;margin:0;cursor:pointer}
+    .upload-main{display:grid;grid-template-columns:auto 1fr auto;gap:15px;align-items:center;padding:20px}.upload-icon{display:grid;place-items:center;width:56px;height:56px;border-radius:18px;background:#F6B6C8;font-size:25px;box-shadow:0 8px 20px rgba(132,82,101,.15)}.upload-copy b{display:block;font-size:15px}.upload-copy span{display:block;color:var(--muted);font-size:12px}.format-chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 20px 18px}.format-chips span{background:rgba(255,244,226,.75);border:1px solid rgba(129,87,71,.15);padding:4px 8px;border-radius:999px;font-size:10px;font-weight:750}.upload-summary{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;background:rgba(137,85,75,.08);font-size:11px;color:var(--muted)}
+    .file-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:12px 15px;text-align:left}
+    .file-pill{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;background:#FFF1DF;border:1px solid rgba(129,87,71,.18);border-radius:15px;padding:10px;font-size:12px;min-width:0}.file-pill .file-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:#F8C8B8;font-size:18px}.file-pill .file-info{min-width:0}.file-pill .file-info b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.file-pill .file-info small{display:block;color:var(--muted);line-height:1.3;margin-top:2px}.file-pill .remove-file{width:30px;height:30px;padding:0!important;border-radius:10px;color:#7a3f49;background:#F9D5D3}
+    .file-preview{display:grid;gap:12px;margin-top:12px;text-align:left}.preview-doc{max-height:330px;overflow:auto;padding:16px;border-radius:14px;background:#FFF5E8;border:1px solid rgba(129,87,71,.18);box-shadow:inset 0 1px 10px rgba(106,71,58,.05)}.preview-doc h4{position:sticky;top:-16px;margin:-16px -16px 12px;padding:10px 14px;background:#F4D4BD;border-bottom:1px solid rgba(129,87,71,.16);z-index:1}.preview-doc pre{white-space:pre-wrap;word-break:break-word;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.preview-doc table{min-width:0}.preview-page{padding:12px 0;border-bottom:2px dashed #d5ab93}
+    .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:12px}
+    .metric{background:rgba(255,241,223,.82);border:1px solid rgba(129,87,71,.16);border-radius:13px;padding:11px;transition:.18s transform}.metric:hover{transform:scale(1.025)}.metric b{display:block;font-size:19px}.metric span{font-size:11px;color:var(--muted)}
+    .notice{border-left:4px solid var(--sky);background:#f2fafc;border-radius:11px;padding:11px 13px;color:#4c5d68;font-size:12px;margin-top:13px}
+    .notice.warn{border-color:var(--butter);background:#fffbeb}.notice.error{border-color:var(--coral);background:#fff1f1;color:#713c43}.notice.ok{border-color:var(--mint);background:#f2fbf4}
+    .status{min-height:20px;margin-top:9px;color:var(--muted);font-size:12px}
+    details{border:1px solid rgba(129,87,71,.18);border-radius:14px;background:rgba(255,240,218,.72)}details summary{cursor:pointer;font-weight:760;padding:12px 14px}details .detail-body{padding:0 14px 14px}
+    .result-panel{position:sticky;top:92px}
+    .result-hero{padding:26px;background:linear-gradient(145deg,#F9D5C5,#E7C5DC);border-bottom:1px solid rgba(129,87,71,.17)}
+    .result-label{font-weight:750;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+    .big-number{font-size:clamp(34px,5vw,55px);letter-spacing:-.05em;line-height:1.1;font-weight:880;margin:8px 0 2px;overflow-wrap:anywhere}
+    .sub-number{color:var(--muted)}
+    .result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:18px}
+    .result-item{border:1px solid rgba(129,87,71,.17);border-radius:15px;padding:13px;background:#FBE6D4;transition:.2s transform}.result-item:nth-child(2n){background:#EED9E8}.result-item:hover{transform:translateY(-3px)}.result-item b{display:block;font-size:18px}.result-item span{color:var(--muted);font-size:11px}
+    .cost-bars{padding:0 18px 18px}.bar-row{margin-top:10px}.bar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}.bar-track{height:9px;border-radius:99px;background:#eee9e4;overflow:hidden}.bar-fill{height:100%;border-radius:99px;min-width:2px}.bar-in{background:var(--sky)}.bar-out{background:var(--rose)}.bar-fixed{background:var(--butter)}
+    .formula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:#2c3444;color:#f9f4ef;border-radius:14px;padding:13px;overflow:auto;margin:0 18px 18px;white-space:pre-wrap}
+    .recommendations{padding:0 18px 20px}.rec{display:flex;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.rec:last-child{border:0}.rec-dot{flex:0 0 28px;height:28px;display:grid;place-items:center;border-radius:10px;background:#e9f6ec;font-weight:850}.rec b{display:block}.rec p{margin:2px 0 0;color:var(--muted);font-size:12px}
+    .comparison{overflow:auto;padding:0 18px 20px}table{width:100%;border-collapse:collapse;font-size:12px;min-width:520px}th,td{text-align:left;padding:10px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em}td.num{text-align:right;font-variant-numeric:tabular-nums}.badge{display:inline-block;border-radius:999px;padding:3px 8px;background:#edf7fa;font-size:10px;font-weight:800}
+    .source-list{display:grid;gap:10px}.source{padding:13px;border:1px solid rgba(129,87,71,.17);border-radius:13px;background:#FBE8D5}.source:nth-child(2n){background:#F4D9D0}.source b{display:block}.source span{font-size:12px;color:var(--muted)}
+    .currency-chip{display:inline-flex;align-items:center;gap:7px;background:#F7D4B6;border:1px solid rgba(129,87,71,.16);padding:7px 10px;border-radius:999px;font-size:12px;font-weight:750;margin-top:7px}
+    .print-only{display:none}
+    @keyframes floatCard{0%,100%{transform:translateY(0) rotate(.2deg)}50%{transform:translateY(-7px) rotate(-.2deg)}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+    footer{padding:28px 0 45px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .toast{position:fixed;right:20px;bottom:20px;z-index:50;max-width:380px;padding:13px 16px;border-radius:14px;background:#263247;color:#fff;box-shadow:var(--shadow);opacity:0;transform:translateY(12px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:none}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:1050px){.layout{grid-template-columns:1fr}.result-panel{position:static}.hero{grid-template-columns:1fr}.hero-card{display:none}}
+    @media(max-width:680px){.shell{width:min(100% - 20px,1480px)}.topbar-inner{padding:10px 0;align-items:flex-start}.top-actions{justify-content:flex-end}.top-actions .btn span{display:none}.hero{padding-top:34px}.grid,.grid.three{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.card-head,.card-body{padding-left:16px;padding-right:16px}.big-number{font-size:38px}.upload-main{grid-template-columns:auto 1fr}.upload-main label{grid-column:1/-1;justify-content:center}.file-list{grid-template-columns:1fr}}
+    @media print{
+      body{background:#fff}.topbar,main,footer,.toast{display:none!important}.print-only{display:block!important;background:#fff;color:#263247}.print-report{font:12px/1.5 Arial,sans-serif}.print-report h1{font-size:25px}.print-report h2{font-size:17px;border-bottom:3px solid #CDB4DB;padding-bottom:5px;break-after:avoid}.print-report table{min-width:0}.print-report .report-cover{padding:28px;background:#FFF1DF;border-left:9px solid #F6B6C8}.print-report .report-section{break-inside:avoid}.no-print{display:none!important}
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell topbar-inner">
+      <div class="brand"><span class="brand-mark">T·</span><div>Tokeniza·IA<small>Cotizador de proyectos con IA</small></div></div>
+      <div class="top-actions">
+        <button class="btn rose" id="downloadCalculator" type="button">↓ <span>Compartir calculadora</span></button>
+        <button class="btn" id="exportReportHtml" type="button">↓ <span>Reporte HTML</span></button>
+        <button class="btn lav" id="exportDoc" type="button">↓ <span>Descargar Word</span></button>
+        <button class="btn mint" id="exportPdf" type="button">↓ <span>Guardar PDF</span></button>
+        <button class="btn danger" id="resetAll" type="button">↻ <span>Reiniciar</span></button>
+      </div>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div>
+        <span class="eyebrow">✦ Planea · compara · cotiza</span>
+        <h1>Convierte tokens en una <span class="gradient-text">cotización defendible.</span></h1>
+        <p class="lead">Calcula el costo técnico de un proyecto, convierte a pesos con Banxico y genera una recomendación práctica sin confundir precio con calidad.</p>
+      </div>
+      <aside class="hero-card" aria-label="Resumen de capacidades">
+        <div class="mini-grid">
+          <div class="mini"><b>51</b><span>modelos del catálogo</span></div>
+          <div class="mini"><b>7</b><span>proveedores comparables</span></div>
+          <div class="mini"><b>MXN · USD</b><span>monedas de cotización</span></div>
+          <div class="mini"><b>PDF · Word</b><span>reporte descargable</span></div>
+        </div>
+      </aside>
+    </section>
+
+    <nav class="workflow" aria-label="Secciones de la calculadora">
+      <a href="#project">01 Proyecto</a><a href="#model">02 Modelo</a><a href="#tokens">03 Tokens</a><a href="#exchange">04 Moneda</a><a href="#results">05 Cotización</a><a href="#sources">06 Fuentes</a>
+    </nav>
+
+    <div class="layout">
+      <div class="stack input-column">
+        <section class="card" id="project">
+          <div class="card-head"><div><h2>Configura el proyecto</h2><p>Contexto para el cálculo y las recomendaciones.</p></div><span class="step">1</span></div>
+          <div class="card-body grid">
+            <div class="wide"><label for="projectName">Nombre del proyecto</label><input id="projectName" value="Proyecto de atención al cliente" placeholder="Ej. Asistente de renta de autos"></div>
+            <div><label for="projectType">Tipo de proyecto</label><select id="projectType"><option value="service">Atención al cliente</option><option value="content">Contenido y marketing</option><option value="analysis">Análisis de datos/documentos</option><option value="research">Investigación</option><option value="coding">Desarrollo de software</option><option value="extraction">Extracción y clasificación</option><option value="translation">Traducción</option><option value="other">Otro</option></select></div>
+            <div><label for="role">Rol que está desempeñando</label><select id="role"><option>Responsable de producto</option><option>Emprendedora / freelance</option><option>Agencia o consultoría</option><option>Marketing y contenidos</option><option>Analista / investigadora</option><option>Desarrolladora</option><option>Estudiante / docente</option><option>Operaciones / servicio</option></select></div>
+            <div><label for="priority">Prioridad de decisión</label><select id="priority"><option value="balanced">Balance costo–desempeño</option><option value="cost">Minimizar costo</option><option value="quality">Priorizar calidad</option><option value="speed">Priorizar velocidad</option></select></div>
+            <div><label for="calls">Llamadas estimadas</label><input id="calls" type="number" min="1" step="1" value="1000"></div>
+            <div><label for="contingency">Contingencia presupuestal</label><input id="contingency" type="number" min="0" max="100" step="1" value="10"><span class="hint">Porcentaje adicional para variación de uso.</span></div>
+            <div><label for="currency">Moneda del reporte</label><select id="currency"><option value="USD">USD — dólar estadounidense</option><option value="MXN" selected>MXN — peso mexicano</option><option value="EUR">EUR — euro</option><option value="GBP">GBP — libra esterlina</option><option value="CAD">CAD — dólar canadiense</option><option value="JPY">JPY — yen japonés</option></select></div>
+          </div>
+        </section>
+
+        <section class="card" id="model">
+          <div class="card-head"><div><h2>Elige el modelo y valida sus tarifas</h2><p>Precios en USD por millón de tokens; puedes actualizarlos.</p></div><span class="step" style="background:var(--sky)">2</span></div>
+          <div class="card-body grid">
+            <div><label for="provider">Proveedor</label><select id="provider"></select></div>
+            <div><label for="modelSelect">Modelo</label><select id="modelSelect"></select></div>
+            <div class="wide" id="modelMeta"></div>
+            <div><label for="inputPrice">Entrada / 1M tokens (USD)</label><input id="inputPrice" type="number" min="0" step="0.0001"></div>
+            <div><label for="outputPrice">Salida / 1M tokens (USD)</label><input id="outputPrice" type="number" min="0" step="0.0001"></div>
+            <div><label for="cachePrice">Entrada en caché / 1M (USD)</label><input id="cachePrice" type="number" min="0" step="0.0001" placeholder="No disponible en la fuente"></div>
+            <div><label for="fixedPrice">Cargo fijo por llamada (USD)</label><input id="fixedPrice" type="number" min="0" step="0.0001"></div>
+            <div class="wide notice warn"><b>Validación necesaria:</b> el catálogo es una fotografía del 13 oct 2026 de GPT for Work. Antes de aprobar una compra, confirma las tarifas en la página oficial del proveedor. Un precio bajo no demuestra calidad, velocidad ni idoneidad.</div>
+          </div>
+        </section>
+
+        <section class="card" id="tokens">
+          <div class="card-head"><div><h2>Mide o estima el volumen</h2><p>Pega texto, adjunta archivos o introduce tokens medidos.</p></div><span class="step" style="background:var(--rose)">3</span></div>
+          <div class="card-body">
+            <div class="grid">
+              <div class="wide"><label for="inputText">Texto de entrada / prompt</label><textarea id="inputText" placeholder="Pega aquí instrucciones, contexto y contenido enviado al modelo…">¿Cuál es el proceso que necesito seguir para alquilar un auto y cuáles son los requisitos, documentos e información que debo tener a la mano?</textarea></div>
+              <div class="wide drop" id="inputDrop"><input id="inputFiles" type="file" multiple><div class="upload-main"><span class="upload-icon">↥</span><div class="upload-copy"><b>Arrastra aquí cualquier tipo de archivo</b><span>Documentos, hojas, presentaciones, imágenes, audio, video, datos o código.</span></div><label class="btn rose" for="inputFiles">Elegir archivos</label></div><div class="format-chips"><span>PDF</span><span>Word</span><span>Excel</span><span>PowerPoint</span><span>Imágenes</span><span>Audio y video</span><span>CSV / JSON</span><span>Código</span><span>Cualquier extensión</span></div><div class="upload-summary"><span id="inputFileCount">Ningún archivo seleccionado</span><span>Máximo 25 MB por archivo</span></div><div class="file-list" id="inputFileList"></div><details id="inputPreviewWrap" hidden><summary>Revisar contenido y estructura extraída</summary><div class="file-preview" id="inputPreview"></div></details></div>
+            </div>
+            <div class="metrics"><div class="metric"><b id="inputChars">0</b><span>caracteres exactos</span></div><div class="metric"><b id="inputWords">0</b><span>palabras</span></div><div class="metric"><b id="inputEstimate">0</b><span>tokens estimados</span></div><div class="metric"><b id="inputUsed">0</b><span>tokens usados</span></div></div>
+            <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
+            <div class="grid">
+              <div class="wide"><label for="outputText">Respuesta esperada o muestra de salida</label><textarea id="outputText" placeholder="Pega una respuesta de muestra o usa el campo manual de tokens…">Para rentar un auto, normalmente necesitas una identificación oficial vigente, licencia de conducir válida y una tarjeta de crédito a nombre del conductor principal. También conviene tener a la mano las fechas, ciudad de recogida y devolución, edad de los conductores y preferencias de cobertura. Los requisitos pueden variar según la empresa, el país y la categoría del vehículo.</textarea></div>
+              <div class="wide drop" id="outputDrop"><input id="outputFiles" type="file" multiple><div class="upload-main"><span class="upload-icon" style="background:#CDB4DB">↥</span><div class="upload-copy"><b>Adjunta cualquier muestra de salida</b><span>Se contabiliza el texto extraíble y se identifica lo que requiere OCR o transcripción.</span></div><label class="btn lav" for="outputFiles">Elegir archivos</label></div><div class="format-chips"><span>Documentos</span><span>Hojas de cálculo</span><span>Presentaciones</span><span>Multimedia</span><span>Datos</span><span>Cualquier extensión</span></div><div class="upload-summary"><span id="outputFileCount">Ningún archivo seleccionado</span><span>Máximo 25 MB por archivo</span></div><div class="file-list" id="outputFileList"></div><details id="outputPreviewWrap" hidden><summary>Revisar contenido y estructura extraída</summary><div class="file-preview" id="outputPreview"></div></details></div>
+            </div>
+            <div class="metrics"><div class="metric"><b id="outputChars">0</b><span>caracteres exactos</span></div><div class="metric"><b id="outputWords">0</b><span>palabras</span></div><div class="metric"><b id="outputEstimate">0</b><span>tokens estimados</span></div><div class="metric"><b id="outputUsed">0</b><span>tokens usados</span></div></div>
+            <div style="height:18px"></div>
+            <details open>
+              <summary>Ajustes de tokenización y facturación</summary>
+              <div class="detail-body grid three">
+                <div><label for="ratio">Caracteres por token</label><input id="ratio" type="number" min="1" max="10" step="0.1" value="4"><span class="hint">Supuesto editable; no es un tokenizer oficial.</span></div>
+                <div><label for="manualInput">Entrada medida (opcional)</label><input id="manualInput" type="number" min="0" step="1" placeholder="Reemplaza la estimación"></div>
+                <div><label for="manualOutput">Salida medida (opcional)</label><input id="manualOutput" type="number" min="0" step="1" placeholder="Reemplaza la estimación"></div>
+                <div><label for="overhead">Tokens extra de entrada/llamada</label><input id="overhead" type="number" min="0" step="1" value="0"><span class="hint">Sistema, herramientas, historial o envoltura.</span></div>
+                <div><label for="cachePct">Entrada servida desde caché (%)</label><input id="cachePct" type="number" min="0" max="100" step="1" value="0"></div>
+                <div><label for="tokenSource">Fuente del conteo</label><select id="tokenSource"><option value="estimate">Estimación local</option><option value="openai">Tokenizer de OpenAI</option><option value="provider">Tokenizer del proveedor</option><option value="measured">Medición de uso real</option></select></div>
+              </div>
+            </details>
+            <div class="notice"><b>Transparencia:</b> caracteres y palabras se cuentan localmente. Los tokens son una estimación por caracteres salvo que completes los campos de medición. Los archivos permanecen en este navegador; el texto no se envía a un servidor de esta calculadora.</div>
+            <div class="status" id="fileStatus" role="status"></div>
+          </div>
+        </section>
+
+        <section class="card" id="exchange">
+          <div class="card-head"><div><h2>Tipos de cambio Banxico</h2><p>Conversión desde tarifas USD hacia MXN, EUR, GBP, CAD o JPY.</p></div><span class="step" style="background:var(--butter)">4</span></div>
+          <div class="card-body grid">
+            <div class="wide"><label for="banxicoToken">Bmx-Token</label><input id="banxicoToken" type="password" autocomplete="off" placeholder="Pega tu token de Banxico (no se guarda ni se exporta)"><span class="hint">Solicítalo en el portal SIE de Banco de México.</span></div>
+            <div><label for="exchangeRate">MXN por 1 USD · SF43718</label><input id="exchangeRate" type="number" min="0.000001" step="0.000001" placeholder="Consulta Banxico o captura manualmente"></div>
+            <div><label for="exchangeDate">Fecha del tipo de cambio</label><input id="exchangeDate" type="text" placeholder="dd/mm/aaaa"></div>
+            <div class="wide" id="targetExchangeGroup" hidden><label for="targetExchangeRate" id="targetExchangeLabel">MXN por moneda objetivo</label><input id="targetExchangeRate" type="number" min="0.00000001" step="0.000001" placeholder="Consulta Banxico o captura manualmente"><span class="hint" id="targetExchangeHint"></span></div>
+            <div class="wide"><span class="currency-chip" id="currencySeriesInfo">MXN usa directamente la serie USD/MXN SF43718.</span></div>
+            <div class="wide segmented"><button class="btn primary" id="fetchBanxico" type="button">Consultar Banxico</button><button class="btn" id="useManualRate" type="button">Usar valor manual</button></div>
+            <div class="wide notice warn">La consulta requiere tu Bmx-Token y acceso de red. Si el navegador bloquea la solicitud desde un archivo local, captura los valores manualmente y conserva la fecha. Para monedas distintas de MXN se aplica una conversión cruzada: USD → MXN → moneda objetivo.</div>
+            <div class="wide status" id="banxicoStatus" role="status"></div>
+          </div>
+        </section>
+
+        <button class="btn primary" id="calculate" type="button" style="padding:17px;font-size:16px">Calcular cotización y recomendaciones →</button>
+      </div>
+
+      <aside class="card result-panel" id="results" aria-live="polite">
+        <div class="result-hero">
+          <div class="result-label">Total estimado del proyecto</div>
+          <div class="big-number" id="grandTotal">—</div>
+          <div class="sub-number" id="grandSub">Completa los datos y calcula</div>
+        </div>
+        <div class="result-grid">
+          <div class="result-item"><b id="perCall">—</b><span>costo por llamada</span></div>
+          <div class="result-item"><b id="withContingency">—</b><span>total con contingencia</span></div>
+          <div class="result-item"><b id="resultInputTokens">—</b><span>tokens de entrada/llamada</span></div>
+          <div class="result-item"><b id="resultOutputTokens">—</b><span>tokens de salida/llamada</span></div>
+        </div>
+        <div class="cost-bars">
+          <div class="bar-row"><div class="bar-label"><span>Entrada</span><b id="inputShare">0%</b></div><div class="bar-track"><div class="bar-fill bar-in" id="inputBar" style="width:0"></div></div></div>
+          <div class="bar-row"><div class="bar-label"><span>Salida</span><b id="outputShare">0%</b></div><div class="bar-track"><div class="bar-fill bar-out" id="outputBar" style="width:0"></div></div></div>
+          <div class="bar-row"><div class="bar-label"><span>Cargo fijo</span><b id="fixedShare">0%</b></div><div class="bar-track"><div class="bar-fill bar-fixed" id="fixedBar" style="width:0"></div></div></div>
+        </div>
+        <div class="formula" id="formula">Costo/llamada = (tokens entrada × tarifa entrada ÷ 1,000,000) + (tokens salida × tarifa salida ÷ 1,000,000) + cargo fijo</div>
+        <div class="card-head" style="padding-top:4px"><div><h2>Recomendaciones</h2><p>Estrategia sugerida según costo, volumen y contexto.</p></div></div>
+        <div class="recommendations" id="recommendations"><div class="rec"><span class="rec-dot">i</span><div><b>Aún no hay recomendación</b><p>Calcula el proyecto para generar un reporte contextual.</p></div></div></div>
+        <div class="card-head"><div><h2>Comparación por costo</h2><p>Mismo volumen; no es una evaluación de calidad.</p></div></div>
+        <div class="comparison"><table><thead><tr><th>Modelo</th><th>Proveedor</th><th class="num">Proyecto</th><th class="num">vs. elegido</th></tr></thead><tbody id="comparisonBody"><tr><td colspan="4">Sin cálculo disponible.</td></tr></tbody></table></div>
+        <div class="notice warn" id="resultWarnings" style="margin:0 18px 18px">Los resultados son estimaciones y excluyen impuestos, descuentos, lotes, herramientas, almacenamiento y otros cargos no indicados.</div>
+      </aside>
+    </div>
+
+    <section class="card" id="sources" style="margin-bottom:28px">
+      <div class="card-head"><div><h2>Fuentes, supuestos y límites</h2><p>Base de verificación de la cotización.</p></div><span class="step" style="background:var(--mint)">✓</span></div>
+      <div class="card-body source-list">
+        <div class="source"><b>Tarifas de modelos · fuente secundaria</b><span>Catálogo de GPT for Work consultado el 13 oct 2026. Incluye precios de entrada, salida y cargos fijos mostrados por esa calculadora. <a href="https://gptforwork.com/tools/openai-chatgpt-api-pricing-calculator" target="_blank" rel="noopener">Abrir fuente</a>.</span></div>
+        <div class="source"><b>Tipos de cambio · fuente oficial</b><span>Banco de México, SIE API REST: SF43718 (USD), SF46410 (EUR), SF46407 (GBP), SF60632 (CAD) y SF46406 (JPY). La API requiere un Bmx-Token; las conversiones no USD/MXN son cruzadas mediante MXN. <a href="https://www.banxico.org.mx/SieAPIRest/swagger/index.html" target="_blank" rel="noopener">Abrir documentación</a>.</span></div>
+        <div class="source"><b>Tokenización · supuesto o medición</b><span>Por defecto: tokens estimados = techo(caracteres ÷ caracteres por token). Para una cotización final, sustituye esta aproximación con el tokenizer del proveedor o datos reales de uso.</span></div>
+        <div class="source"><b>Límites del costo</b><span>No se mezclan precios de suscripción con API. No se presupuestan impuestos, razonamiento oculto, búsquedas, imágenes, audio, herramientas, almacenamiento, transferencias, procesamiento regional, lotes ni descuentos si no se capturan expresamente.</span></div>
+      </div>
+    </section>
+  </main>
+
+  <section id="printReport" class="print-only print-report" aria-hidden="true"></section>
+
+  <footer class="shell"><span>Tokeniza·IA · Estimación y escalamiento de costos de modelos de IA</span><span>© Wendy Miranda</span></footer>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+  (() => {
+    'use strict';
+    const PRICE_DATE = '13/10/2026';
+    const models = [
+      ['OpenAI','gpt-5.6-sol',5,30,0],['OpenAI','gpt-5.6-terra',2,12,0],['OpenAI','gpt-5.6-luna',.2,1.2,0],['OpenAI','gpt-5.5',5,30,0],['OpenAI','gpt-5.4',2.5,15,0],['OpenAI','gpt-5.4-mini',.75,4.5,0],['OpenAI','gpt-5.4-nano',.2,1.25,0],['OpenAI','gpt-5.2',1.75,14,0],['OpenAI','gpt-5.1',1.25,10,0],['OpenAI','gpt-5-mini',.25,2,0],['OpenAI','gpt-5-nano',.05,.4,0],['OpenAI','gpt-4.1',2,8,0],['OpenAI','gpt-4.1-mini',.4,1.6,0],['OpenAI','gpt-5-search-api',1.25,10,.01],['OpenAI','gpt-4o',2.5,10,0],['OpenAI','gpt-4o-mini',.15,.6,0],['OpenAI','gpt-5',1.25,10,0],['OpenAI','o3-2025-04-16',2,8,0],['OpenAI','Fine-tuned GPT-4o',3.75,15,0],['OpenAI','Fine-tuned GPT-4o mini',.3,1.2,0],['OpenAI','Fine-tuned GPT-4.1',3,12,0],
+      ['Perplexity','sonar',1,1,.005],['Perplexity','sonar-pro',3,15,.006],['Perplexity','sonar-reasoning-pro',2,8,.006],
+      ['Google','gemini-3.5-flash',1.5,9,0],['Google','gemini-3.1-flash-lite',.25,1.5,0],['Google','gemini-3-flash-preview',.5,3,0],['Google','gemini-3.1-pro-preview',2,12,0],['Google','gemini-2.5-flash',.3,2.5,0],['Google','gemini-2.5-flash-lite',.1,.4,0],['Google','gemini-2.5-pro',1.25,10,0],
+      ['xAI','grok-4.3',1.25,2.5,0],
+      ['Anthropic','claude-sonnet-5',2,10,0],['Anthropic','claude-sonnet-4-6',3,15,0],['Anthropic','claude-sonnet-4-5-20250929',3,15,0],['Anthropic','claude-fable-5',10,50,0],['Anthropic','claude-opus-5',5,25,0],['Anthropic','claude-opus-4-8',5,25,0],['Anthropic','claude-opus-4-7',5,25,0],['Anthropic','claude-opus-4-6',5,25,0],['Anthropic','claude-opus-4-5-20251101',5,25,0],['Anthropic','claude-haiku-4-5-20251001',1,5,0],
+      ['DeepSeek','deepseek-v4-flash (off-peak)',.22,.66,0],['DeepSeek','deepseek-v4-pro (off-peak)',.66,1.98,0],['DeepSeek','deepseek-v4-flash (peak)',.44,1.32,0],['DeepSeek','deepseek-v4-pro (peak)',1.32,3.96,0],
+      ['Mistral','mistral-large-latest',.5,1.5,0],['Mistral','mistral-medium-latest',1.5,7.5,0],['Mistral','mistral-small-latest',.15,.6,0],['Mistral','ministral-8b-latest',.15,.15,0],['Mistral','ministral-3b-latest',.1,.1,0]
+    ].map((m,i)=>({id:i,provider:m[0],name:m[1],input:m[2],output:m[3],fixed:m[4]}));
+
+    const $ = id => document.getElementById(id);
+    const els = ['projectName','projectType','role','priority','calls','contingency','currency','provider','modelSelect','inputPrice','outputPrice','cachePrice','fixedPrice','inputText','outputText','ratio','manualInput','manualOutput','overhead','cachePct','tokenSource','exchangeRate','targetExchangeRate','exchangeDate'].reduce((o,k)=>(o[k]=$(k),o),{});
+    let inputAttachments = [], outputAttachments = [], lastResult = null;
+    const providers = [...new Set(models.map(m=>m.provider))];
+    const currencySeries = {
+      USD:{series:null,label:'Dólar estadounidense',unit:'USD'},
+      MXN:{series:'SF43718',label:'Peso mexicano',unit:'MXN por USD'},
+      EUR:{series:'SF46410',label:'Euro',unit:'MXN por EUR'},
+      GBP:{series:'SF46407',label:'Libra esterlina',unit:'MXN por GBP'},
+      CAD:{series:'SF60632',label:'Dólar canadiense',unit:'MXN por CAD'},
+      JPY:{series:'SF46406',label:'Yen japonés',unit:'MXN por JPY'}
+    };
+
+    function esc(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
+    function n(v){const x=Number(v);return Number.isFinite(x)?x:0;}
+    function int(v){return Math.max(0,Math.round(n(v)));}
+    function fmtNum(v,max=0){return new Intl.NumberFormat('es-MX',{maximumFractionDigits:max}).format(v||0);}
+    function money(v,c='USD',digits){return new Intl.NumberFormat('es-MX',{style:'currency',currency:c,minimumFractionDigits:digits??(Math.abs(v)<.01?6:2),maximumFractionDigits:digits??(Math.abs(v)<.01?6:2)}).format(v||0);}
+    function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('show'),3300);}
+    function words(text){if(!text.trim())return 0;try{return [...new Intl.Segmenter('es',{granularity:'word'}).segment(text)].filter(x=>x.isWordLike).length}catch{return text.trim().split(/\s+/).length;}}
+    function chars(text){return Array.from(text).length;}
+    function combined(base,arr){return [base,...arr.map(x=>x.text)].filter(Boolean).join('\n\n');}
+    function tokenEstimate(text){return text?Math.ceil(chars(text)/Math.max(1,n(els.ratio.value)||4)):0;}
+    function tokenUse(kind,estimate){const manual = kind==='input'?els.manualInput.value:els.manualOutput.value;return manual!==''?int(manual):estimate;}
+    function sanitizeHTML(html){const doc=new DOMParser().parseFromString(html,'text/html');doc.querySelectorAll('script,style,iframe,object,embed,link,meta').forEach(x=>x.remove());doc.querySelectorAll('*').forEach(el=>{[...el.attributes].forEach(a=>{if(/^on/i.test(a.name)||(a.name==='href'&&/^javascript:/i.test(a.value)))el.removeAttribute(a.name);});});return doc.body.innerHTML;}
+
+    function initModels(){
+      els.provider.innerHTML='<option value="all">Todos los proveedores</option>'+providers.map(p=>`<option>${esc(p)}</option>`).join('');
+      renderModels('OpenAI'); els.provider.value='OpenAI'; els.modelSelect.value=2; setModel();
+    }
+    function renderModels(provider){const filtered=provider==='all'?models:models.filter(m=>m.provider===provider);els.modelSelect.innerHTML=filtered.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');if(filtered.length)els.modelSelect.value=filtered[0].id;setModel();}
+    function selectedModel(){return models.find(m=>m.id===Number(els.modelSelect.value))||models[0];}
+    function setModel(){const m=selectedModel();els.inputPrice.value=m.input;els.outputPrice.value=m.output;els.fixedPrice.value=m.fixed;els.cachePrice.value='';$('modelMeta').innerHTML=`<span class="badge">${esc(m.provider)}</span> <b>${esc(m.name)}</b> <span class="hint">Tarifa base consultada ${PRICE_DATE}; no incluye caché porque la fuente comparativa no la publica.</span>`;live(false);}
+
+    function fileDataURL(file){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error(`No se pudo leer ${file.name}`));reader.readAsDataURL(file);});}
+    function fileIcon(file){const type=file.type||'',ext=(file.name.split('.').pop()||'').toLowerCase();if(type.startsWith('image/'))return '▧';if(type.startsWith('audio/'))return '♫';if(type.startsWith('video/'))return '▶';if(ext==='pdf')return 'PDF';if(['doc','docx','odt','rtf'].includes(ext))return 'W';if(['xls','xlsx','ods'].includes(ext))return 'X';if(['ppt','pptx','odp'].includes(ext))return 'P';if(['zip','rar','7z'].includes(ext))return 'ZIP';return 'TXT';}
+    async function readFile(file){
+      if(file.size>25*1024*1024)throw new Error(`${file.name}: supera 25 MB`);
+      const ext=(file.name.split('.').pop()||'').toLowerCase(),mime=file.type||'';
+      if(ext==='docx'){
+        if(!window.mammoth)throw new Error('No se pudo cargar el lector DOCX; usa TXT o pega el texto.');
+        const ab=await file.arrayBuffer();const [raw,formatted]=await Promise.all([window.mammoth.extractRawText({arrayBuffer:ab.slice(0)}),window.mammoth.convertToHtml({arrayBuffer:ab.slice(0)})]);
+        return {text:raw.value,html:sanitizeHTML(formatted.value),format:'DOCX · títulos, listas y tablas compatibles',extractable:true};
+      }
+      if(ext==='pdf'){
+        const pdfjs=window['pdfjs-dist/build/pdf'] || window.pdfjsLib;
+        if(!pdfjs)throw new Error('El lector PDF no está disponible en este navegador; pega el texto o usa TXT.');
+        const doc=await pdfjs.getDocument({data:await file.arrayBuffer(),disableWorker:true}).promise;let text='',html='';
+        for(let i=1;i<=doc.numPages;i++){const page=await doc.getPage(i);const content=await page.getTextContent();let pageText='',lastY=null;for(const item of content.items){const y=item.transform?.[5]??lastY;if(lastY!==null&&Math.abs(y-lastY)>2)pageText+='\n';else if(pageText&&!pageText.endsWith('\n'))pageText+=' ';pageText+=item.str;lastY=y;}text+=`\n--- Página ${i} ---\n${pageText}\n`;html+=`<div class="preview-page"><b>Página ${i}</b><pre>${esc(pageText)}</pre></div>`;}return {text,html,format:`PDF · ${doc.numPages} página(s), saltos conservados`,extractable:true};
+      }
+      if(['xlsx','xls','xlsm','xlsb','ods'].includes(ext)){
+        if(!window.XLSX)throw new Error('No se pudo cargar el lector de hojas de cálculo.');const wb=window.XLSX.read(await file.arrayBuffer(),{type:'array'});let text='',html='';for(const name of wb.SheetNames){const ws=wb.Sheets[name],csv=window.XLSX.utils.sheet_to_csv(ws);text+=`\n--- Hoja: ${name} ---\n${csv}\n`;html+=`<div class="preview-page"><b>Hoja: ${esc(name)}</b>${sanitizeHTML(window.XLSX.utils.sheet_to_html(ws))}</div>`;}return {text,html,format:`Hoja de cálculo · ${wb.SheetNames.length} pestaña(s), estructura tabular`,extractable:true};
+      }
+      if(ext==='pptx'){
+        if(!window.JSZip)throw new Error('No se pudo cargar el lector de presentaciones.');const zip=await window.JSZip.loadAsync(await file.arrayBuffer()),slides=Object.keys(zip.files).filter(x=>/^ppt\/slides\/slide\d+\.xml$/.test(x)).sort((a,b)=>Number(a.match(/\d+/)?.[0])-Number(b.match(/\d+/)?.[0]));let text='',html='';for(let i=0;i<slides.length;i++){const xml=await zip.file(slides[i]).async('string'),doc=new DOMParser().parseFromString(xml,'application/xml'),nodes=[...doc.getElementsByTagNameNS('*','t')],slideText=nodes.map(x=>x.textContent).join('\n');text+=`\n--- Diapositiva ${i+1} ---\n${slideText}\n`;html+=`<div class="preview-page"><b>Diapositiva ${i+1}</b><pre>${esc(slideText)}</pre></div>`;}return {text,html,format:`PPTX · ${slides.length} diapositiva(s), texto por diapositiva`,extractable:true};
+      }
+      if(mime.startsWith('image/')){const url=await fileDataURL(file);return {text:'',html:`<img src="${url}" alt="Vista previa de ${esc(file.name)}" style="display:block;max-width:100%;max-height:360px;margin:auto;border-radius:12px">`,format:'Imagen · vista preservada; requiere OCR para contar texto',extractable:false};}
+      if(mime.startsWith('audio/')){const url=await fileDataURL(file);return {text:'',html:`<audio controls src="${url}" style="width:100%"></audio>`,format:'Audio · reproducción preservada; requiere transcripción',extractable:false};}
+      if(mime.startsWith('video/')){const url=await fileDataURL(file);return {text:'',html:`<video controls src="${url}" style="display:block;width:100%;max-height:360px;border-radius:12px"></video>`,format:'Video · reproducción preservada; requiere transcripción',extractable:false};}
+      const textLike=mime.startsWith('text/')||['txt','md','csv','tsv','json','jsonl','html','htm','xml','css','js','ts','jsx','tsx','py','java','c','cpp','h','hpp','sql','yaml','yml','toml','ini','log','rtf','srt','vtt','svg'].includes(ext);
+      if(textLike){const text=await file.text();return {text,html:`<pre>${esc(text.slice(0,120000))}</pre>`,format:`${ext.toUpperCase()||'TEXTO'} · saltos y espacios conservados`,extractable:true};}
+      return {text:'',html:`<div class="notice warn"><b>Archivo aceptado.</b> Este formato binario no tiene un extractor de texto integrado. Se incluye en el inventario, pero aporta 0 tokens hasta proporcionar una versión textual.</div>`,format:`${ext.toUpperCase()||mime||'Binario'} · aceptado sin extracción de texto`,extractable:false};
+    }
+    async function addFiles(fileList,kind){
+      const target=kind==='input'?inputAttachments:outputAttachments;const status=$('fileStatus');status.textContent='Leyendo archivos…';
+      for(const file of [...fileList]){try{const parsed=await readFile(file);target.push({name:file.name,size:file.size,type:file.type,...parsed});}catch(e){toast(e.message);}}
+      status.textContent=`${inputAttachments.length+outputAttachments.length} archivo(s) incorporado(s) al conteo local.`;renderFiles(kind);live(false);
+    }
+    function renderFiles(kind){const list=kind==='input'?inputAttachments:outputAttachments;const el=$(kind==='input'?'inputFileList':'outputFileList'),preview=$(kind==='input'?'inputPreview':'outputPreview'),wrap=$(kind==='input'?'inputPreviewWrap':'outputPreviewWrap'),counter=$(kind==='input'?'inputFileCount':'outputFileCount');el.innerHTML=list.map((f,i)=>`<div class="file-pill"><span class="file-icon">${fileIcon(f)}</span><span class="file-info"><b title="${esc(f.name)}">${esc(f.name)}</b><small>${esc(f.format)}<br>${fmtNum(f.size/1024,1)} KB · ${f.extractable?'incluido en tokens':'sin tokens'}</small></span><button type="button" class="btn remove-file" aria-label="Quitar ${esc(f.name)}" data-kind="${kind}" data-remove="${i}">×</button></div>`).join('');preview.innerHTML=list.map(f=>`<article class="preview-doc"><h4>${esc(f.name)}</h4>${f.html||`<pre>${esc(f.text.slice(0,120000))}</pre>`}</article>`).join('');wrap.hidden=!list.length;counter.textContent=list.length?`${list.length} archivo(s) · ${list.filter(f=>f.extractable).length} con texto contabilizado`:'Ningún archivo seleccionado';}
+    function wireDrop(kind){const input=$(kind+'Files'),drop=$(kind+'Drop');input.addEventListener('change',()=>addFiles(input.files,kind));['dragenter','dragover'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.add('drag')}));['dragleave','drop'].forEach(e=>drop.addEventListener(e,x=>{x.preventDefault();drop.classList.remove('drag')}));drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files,kind));}
+
+    function live(recalculate=true){
+      const inText=combined(els.inputText.value,inputAttachments),outText=combined(els.outputText.value,outputAttachments);
+      const data={ic:chars(inText),iw:words(inText),ie:tokenEstimate(inText),oc:chars(outText),ow:words(outText),oe:tokenEstimate(outText)};
+      data.iu=tokenUse('input',data.ie);data.ou=tokenUse('output',data.oe);
+      $('inputChars').textContent=fmtNum(data.ic);$('inputWords').textContent=fmtNum(data.iw);$('inputEstimate').textContent=fmtNum(data.ie);$('inputUsed').textContent=fmtNum(data.iu);
+      $('outputChars').textContent=fmtNum(data.oc);$('outputWords').textContent=fmtNum(data.ow);$('outputEstimate').textContent=fmtNum(data.oe);$('outputUsed').textContent=fmtNum(data.ou);
+      if(recalculate&&lastResult)calculate(false);return data;
+    }
+
+    function updateCurrencyUI(){const code=els.currency.value,meta=currencySeries[code],cross=!['USD','MXN'].includes(code);$('targetExchangeGroup').hidden=!cross;$('targetExchangeLabel').textContent=`MXN por 1 ${code} · ${meta.series||''}`;$('targetExchangeHint').textContent=cross?`Serie Banxico ${meta.series}. Se usa junto con SF43718 para la conversión cruzada.`:'';$('currencySeriesInfo').textContent=code==='USD'?'USD es la moneda base de las tarifas; no requiere conversión.':code==='MXN'?'MXN usa directamente la serie USD/MXN SF43718.':`${code}: USD → MXN con SF43718 y MXN → ${code} con ${meta.series}.`;}
+    function rateUSD(){const code=els.currency.value;if(code==='USD')return 1;const usdMxn=n(els.exchangeRate.value);if(code==='MXN')return usdMxn;return usdMxn/n(els.targetExchangeRate.value);}
+    function validate(){
+      const errors=[];if(!els.projectName.value.trim())errors.push('Escribe el nombre del proyecto.');if(n(els.calls.value)<=0)errors.push('Las llamadas deben ser mayores que cero.');
+      if(n(els.inputPrice.value)<0||n(els.outputPrice.value)<0||n(els.fixedPrice.value)<0)errors.push('Las tarifas no pueden ser negativas.');
+      if(n(els.cachePct.value)>0&&els.cachePrice.value==='')errors.push('Captura la tarifa de entrada en caché o establece caché en 0%.');
+      if(els.currency.value!=='USD'&&n(els.exchangeRate.value)<=0)errors.push('Consulta o captura el tipo de cambio USD→MXN.');
+      if(!['USD','MXN'].includes(els.currency.value)&&n(els.targetExchangeRate.value)<=0)errors.push(`Consulta o captura el valor MXN por ${els.currency.value}.`);
+      return errors;
+    }
+    function calcModel(m,inputTokens,outputTokens,calls){return (((inputTokens*m.input)+(outputTokens*m.output))/1e6+m.fixed)*calls;}
+    function calculate(show=true){
+      const errors=validate();if(errors.length){$('resultWarnings').innerHTML='<b>No se calculó:</b> '+errors.map(esc).join(' ');if(show)toast(errors[0]);return;}
+      const t=live(false), overhead=int(els.overhead.value), inTotal=t.iu+overhead, outTotal=t.ou, calls=int(els.calls.value), cachePct=Math.min(100,Math.max(0,n(els.cachePct.value))), cached=inTotal*cachePct/100, uncached=inTotal-cached;
+      const pin=n(els.inputPrice.value),pout=n(els.outputPrice.value),pcache=n(els.cachePrice.value),fixed=n(els.fixedPrice.value);
+      const cIn=uncached*pin/1e6+cached*pcache/1e6,cOut=outTotal*pout/1e6,cFixed=fixed,perCall=cIn+cOut+cFixed,totalUSD=perCall*calls,fx=rateUSD(),currency=els.currency.value,total=totalUSD*fx,cont=n(els.contingency.value),buffered=total*(1+cont/100),den=perCall||1;
+      const m=selectedModel();
+      lastResult={m,t,overhead,inTotal,outTotal,calls,cachePct,cached,uncached,pin,pout,pcache,fixed,cIn,cOut,cFixed,perCall,totalUSD,total,fx,currency,cont,buffered,date:new Date().toLocaleDateString('es-MX')};
+      $('grandTotal').textContent=money(total,currency);$('grandSub').textContent=`${fmtNum(calls)} llamadas · ${m.provider} / ${m.name}`;$('perCall').textContent=money(perCall*fx,currency);$('withContingency').textContent=money(buffered,currency);$('resultInputTokens').textContent=fmtNum(inTotal);$('resultOutputTokens').textContent=fmtNum(outTotal);
+      const shares={input:cIn/den*100,output:cOut/den*100,fixed:cFixed/den*100};
+      ['input','output','fixed'].forEach(k=>{$(k+'Share').textContent=fmtNum(shares[k],1)+'%';$(k+'Bar').style.width=Math.min(100,shares[k])+'%'});
+      $('formula').textContent=`Entrada: (${fmtNum(uncached)} × $${pin}/1M)${cached?` + (${fmtNum(cached)} caché × $${pcache}/1M)`:''} = $${cIn.toFixed(6)}\nSalida: ${fmtNum(outTotal)} × $${pout}/1M = $${cOut.toFixed(6)}\nCargo fijo = $${cFixed.toFixed(6)}\nCosto/llamada = $${perCall.toFixed(6)} USD\nProyecto = $${perCall.toFixed(6)} × ${fmtNum(calls)} = $${totalUSD.toFixed(6)} USD${currency!=='USD'?`\nFactor USD→${currency} = ${fx.toFixed(8)}\nConversión = $${totalUSD.toFixed(6)} × ${fx.toFixed(8)} = ${money(total,currency)}`:''}`;
+      renderComparison();renderRecommendations(shares);renderWarnings();if(show)toast('Cotización actualizada.');
+    }
+
+    function renderComparison(){
+      const r=lastResult, conv=r.fx, selectedUSD=r.totalUSD;const rows=models.map(m=>{const priced=m.id===r.m.id?{...m,input:r.pin,output:r.pout,fixed:r.fixed}:m;return {...priced,total:calcModel(priced,r.inTotal,r.outTotal,r.calls)}}).sort((a,b)=>a.total-b.total).slice(0,8);
+      if(!rows.some(x=>x.id===r.m.id))rows.push({...r.m,total:selectedUSD});
+      $('comparisonBody').innerHTML=rows.map((x,i)=>{const delta=x.total-selectedUSD,pct=selectedUSD?delta/selectedUSD*100:0;return `<tr><td>${i===0?'<span class="badge">Menor costo</span> ':''}${esc(x.name)}${x.id===r.m.id?' <b>· elegido</b>':''}</td><td>${esc(x.provider)}</td><td class="num">${money(x.total*conv,r.currency)}</td><td class="num">${x.id===r.m.id?'—':`${delta>=0?'+':''}${money(delta*conv,r.currency)} (${delta>=0?'+':''}${fmtNum(pct,1)}%)`}</td></tr>`}).join('');
+    }
+    function rec(icon,title,text){return `<div class="rec"><span class="rec-dot">${icon}</span><div><b>${esc(title)}</b><p>${esc(text)}</p></div></div>`;}
+    function renderRecommendations(shares){
+      const r=lastResult, cheapest=models.map(m=>{const priced=m.id===r.m.id?{...m,input:r.pin,output:r.pout,fixed:r.fixed}:m;return {...priced,total:calcModel(priced,r.inTotal,r.outTotal,r.calls)}}).sort((a,b)=>a.total-b.total)[0];let list=[];
+      const strategies={service:'Usa respuestas breves, plantillas para preguntas frecuentes y escala a un modelo más costoso solo los casos ambiguos.',content:'Separa borrador y revisión: genera volumen con una ruta económica y reserva la revisión humana o de mayor costo para piezas prioritarias.',analysis:'Fragmenta documentos, reutiliza contexto estable y valida resultados con una muestra conocida antes de escalar.',research:'Define cuándo se necesita búsqueda actualizada, conserva trazabilidad de fuentes y limita el contexto a evidencia relevante.',coding:'Divide tareas rutinarias y complejas, evita reenviar repositorios completos y mide calidad con pruebas automatizadas.',extraction:'Solicita salida estructurada y valida precisión, formato y tasa de error en una muestra antes del procesamiento masivo.',translation:'Reutiliza glosarios, procesa en lotes razonables y controla longitud, formato y revisión de términos sensibles.',other:'Prueba el flujo con una muestra representativa y mide costo por tarea correctamente resuelta.'};
+      list.push(rec('1','Estrategia de operación',strategies[els.projectType.value]));
+      if(shares.output>shares.input)list.push(rec('2','La salida domina el costo',`La salida representa ${fmtNum(shares.output,1)}% del costo por llamada. Limitar longitud, usar formatos compactos y detener respuestas redundantes tendrá más impacto que recortar el prompt.`));else list.push(rec('2','La entrada domina el costo',`La entrada representa ${fmtNum(shares.input,1)}% del costo por llamada. Reduce historial, fragmenta archivos y evita contexto repetido.`));
+      if(r.calls>=10000)list.push(rec('3','Valida antes de escalar',`Con ${fmtNum(r.calls)} llamadas, ejecuta un piloto y fija alertas por costo por tarea, tokens de salida y tasa de éxito. Verifica si el proveedor ofrece lotes o caché; no se presupuestaron descuentos.`));
+      if(els.priority.value==='cost')list.push(rec('4','Candidato por costo',`${cheapest.name} (${cheapest.provider}) produce el menor costo matemático en este catálogo y volumen. No lo adoptes sin comparar calidad y tasa de éxito con el modelo elegido.`));
+      else if(els.priority.value==='quality')list.push(rec('4','La calidad requiere evaluación',`El precio no permite concluir qué modelo es mejor. Compara ${r.m.name} contra al menos un candidato alternativo con casos reales, criterios de exactitud, tono y seguridad.`));
+      else list.push(rec('4','Enrutamiento por niveles',`Mantén ${r.m.name} como referencia y prueba un modelo de menor costo para solicitudes simples; escala únicamente cuando la complejidad o el riesgo lo justifique.`));
+      if(r.cachePct===0&&r.inTotal>r.outTotal*3)list.push(rec('5','Explora caché de contexto',`El contexto de entrada es elevado. Si gran parte se repite, revisa la función de caché del proveedor y captura su tarifa real antes de incluir el ahorro.`));
+      list.push(rec('✓','Criterio para tu rol',`${els.role.value}: aprueba con costo por tarea exitosa, no solo costo por token. Responsable de validación: por definir.`));
+      $('recommendations').innerHTML=list.join('');
+    }
+    function renderWarnings(){const r=lastResult,w=[];if(els.manualInput.value===''||els.manualOutput.value==='')w.push('Hay tokens estimados; sustituye por una medición del tokenizer o por uso real.');if(r.currency!=='USD')w.push(`Factor de conversión usado: 1 USD = ${r.fx.toFixed(8)} ${r.currency} (${els.exchangeDate.value||'fecha no indicada'}).`);if(!['USD','MXN'].includes(r.currency))w.push(`La conversión ${r.currency} es cruzada mediante MXN; confirma la unidad de las series SF43718 y ${currencySeries[r.currency].series}.`);if(r.cachePct>0)w.push('La comparación entre modelos ignora caché porque la fuente base no publica esa tarifa de forma homogénea.');w.push('Excluye impuestos, descuentos y cargos no capturados.');$('resultWarnings').innerHTML='<b>Alertas vigentes:</b> '+w.map(esc).join(' ');}
+
+    async function fetchBanxicoSeries(series,token){const res=await fetch(`https://www.banxico.org.mx/SieAPIRest/service/v1/series/${series}/datos/oportuno`,{headers:{'Bmx-Token':token,'Accept':'application/json'}});if(!res.ok)throw new Error(`Banxico respondió ${res.status} para ${series}`);const data=await res.json(),d=data?.bmx?.series?.[0]?.datos?.[0];if(!d||!d.dato)throw new Error(`La serie ${series} no contiene un dato oportuno.`);const rate=Number(String(d.dato).replace(/,/g,''));if(!Number.isFinite(rate))throw new Error(`El dato de ${series} no es numérico.`);return {rate,date:d.fecha||''};}
+    async function fetchBanxico(){
+      const token=$('banxicoToken').value.trim(),status=$('banxicoStatus'),code=els.currency.value;if(!token){toast('Pega primero tu Bmx-Token.');return;}if(code==='USD'){status.textContent='USD es la moneda base; no necesita tipo de cambio.';return;}
+      status.textContent=`Consultando Banxico para ${code}…`;
+      try{const usd=await fetchBanxicoSeries('SF43718',token);els.exchangeRate.value=usd.rate;els.exchangeDate.value=usd.date;if(!['USD','MXN'].includes(code)){const target=await fetchBanxicoSeries(currencySeries[code].series,token);els.targetExchangeRate.value=target.rate;els.exchangeDate.value=target.date||usd.date;status.innerHTML=`<span style="color:#39704a">Datos recibidos: ${usd.rate} MXN/USD y ${target.rate} MXN/${code} · ${esc(els.exchangeDate.value)}. Factor: 1 USD = ${(usd.rate/target.rate).toFixed(8)} ${code}.</span>`;}else status.innerHTML=`<span style="color:#39704a">Dato recibido: ${usd.rate} MXN por USD · ${esc(usd.date||'sin fecha')}.</span>`;lastResult&&calculate(false);}
+      catch(e){status.innerHTML=`<span style="color:#8b4650">No fue posible consultar directamente: ${esc(e.message)}. Captura los tipos de cambio manualmente; algunos navegadores bloquean solicitudes desde archivos locales.</span>`;}
+    }
+    function reportBodyHTML(){
+      if(!lastResult)calculate(false);if(!lastResult)return null;const r=lastResult,den=r.perCall||1,inShare=r.cIn/den*100,outShare=r.cOut/den*100,fixedShare=r.cFixed/den*100;
+      const recs=[...$('recommendations').querySelectorAll('.rec')].map(x=>`<li><b>${esc(x.querySelector('b')?.textContent||'')}</b>: ${esc(x.querySelector('p')?.textContent||'')}</li>`).join(''),comparisons=$('comparisonBody').innerHTML;
+      const attachmentRows=[...inputAttachments.map(f=>['Entrada',f]),...outputAttachments.map(f=>['Salida',f])].map(([kind,f])=>`<tr><td>${kind}</td><td>${esc(f.name)}</td><td>${esc(f.format)}</td><td>${fmtNum(f.size/1024,1)} KB</td></tr>`).join('')||'<tr><td colspan="4">No se adjuntaron archivos.</td></tr>';
+      const scales=[1000,10000,1000000].map(v=>`<tr><td>${fmtNum(v)}</td><td>${money(r.perCall*r.fx*v,r.currency)}</td><td>${money(r.perCall*r.fx*v*(1+r.cont/100),r.currency)}</td></tr>`).join('');
+      const tokenMethod=els.manualInput.value!==''&&els.manualOutput.value!==''?'Tokens proporcionados manualmente':els.tokenSource.options[els.tokenSource.selectedIndex].text+' con estimación local para campos no medidos';
+      const fxText=r.currency==='USD'?'Sin conversión: las tarifas se expresan en USD.':r.currency==='MXN'?`${els.exchangeRate.value} MXN por USD, serie SF43718 o valor manual, fecha ${els.exchangeDate.value||'no indicada'}.`:`Conversión cruzada: ${els.exchangeRate.value} MXN/USD ÷ ${els.targetExchangeRate.value} MXN/${r.currency} = ${r.fx.toFixed(8)} ${r.currency}/USD. Series SF43718 y ${currencySeries[r.currency].series}; fecha ${els.exchangeDate.value||'no indicada'}.`;
+      return `<div class="report-cover"><div class="report-kicker">REPORTE DE COTIZACIÓN DE IA</div><h1>Tokeniza·IA</h1><h3>${esc(els.projectName.value)}</h3><p>Estimación técnica de consumo, costo, sensibilidad y estrategia de implementación.</p><table class="summary"><tr><td><small>Total estimado</small><br><b>${money(r.total,r.currency)}</b></td><td><small>Con contingencia (${r.cont}%)</small><br><b>${money(r.buffered,r.currency)}</b></td><td><small>Costo por llamada</small><br><b>${money(r.perCall*r.fx,r.currency)}</b></td></tr></table><p class="small">Preparado el ${esc(r.date)} · Moneda: ${r.currency} · © Wendy Miranda</p></div>
+      <div class="report-section"><h2>1. Resumen ejecutivo</h2><p>La cotización estima el costo de <b>${fmtNum(r.calls)} llamadas</b> al modelo <b>${esc(r.m.name)}</b> de ${esc(r.m.provider)}. Bajo los volúmenes y tarifas capturados, el costo técnico esperado es <b>${money(r.total,r.currency)}</b>; con una reserva de ${r.cont}% asciende a <b>${money(r.buffered,r.currency)}</b>. Esta cifra representa consumo de API y cargos fijos indicados: no equivale al precio comercial final del proyecto ni incorpora trabajo humano, integración, impuestos o infraestructura no capturada.</p><p><b>Lectura principal:</b> la entrada explica ${fmtNum(inShare,1)}% del costo por llamada, la salida ${fmtNum(outShare,1)}% y el cargo fijo ${fmtNum(fixedShare,1)}%. La variable de mayor participación es <b>${outShare>=inShare&&outShare>=fixedShare?'la salida':inShare>=fixedShare?'la entrada':'el cargo fijo'}</b>.</p></div>
+      <div class="report-section"><h2>2. Perfil y alcance del proyecto</h2><table><tr><th>Campo</th><th>Valor utilizado</th></tr><tr><td>Tipo de proyecto</td><td>${esc(els.projectType.options[els.projectType.selectedIndex].text)}</td></tr><tr><td>Rol</td><td>${esc(els.role.value)}</td></tr><tr><td>Prioridad</td><td>${esc(els.priority.options[els.priority.selectedIndex].text)}</td></tr><tr><td>Modelo</td><td>${esc(r.m.provider)} / ${esc(r.m.name)}</td></tr><tr><td>Llamadas</td><td>${fmtNum(r.calls)}</td></tr><tr><td>Moneda</td><td>${r.currency}</td></tr></table></div>
+      <div class="report-section"><h2>3. Metodología de tokens</h2><p><b>Método declarado:</b> ${esc(tokenMethod)}. Los caracteres y palabras se cuentan localmente. Cuando no existe una medición manual, la estimación aplica: <i>tokens = techo(caracteres ÷ ${els.ratio.value})</i>. Esta aproximación ayuda a planear, pero debe reemplazarse por el tokenizer del proveedor o telemetría real antes de cerrar un presupuesto contractual.</p><table><tr><th>Componente</th><th>Caracteres</th><th>Palabras</th><th>Tokens usados</th></tr><tr><td>Entrada visible y archivos</td><td>${fmtNum(r.t.ic)}</td><td>${fmtNum(r.t.iw)}</td><td>${fmtNum(r.t.iu)}</td></tr><tr><td>Instrucciones/sistema adicionales</td><td>—</td><td>—</td><td>${fmtNum(r.overhead)}</td></tr><tr><td><b>Total de entrada por llamada</b></td><td>—</td><td>—</td><td><b>${fmtNum(r.inTotal)}</b></td></tr><tr><td>Salida esperada</td><td>${fmtNum(r.t.oc)}</td><td>${fmtNum(r.t.ow)}</td><td>${fmtNum(r.outTotal)}</td></tr></table><h3>Archivos incorporados</h3><table><tr><th>Uso</th><th>Archivo</th><th>Tratamiento del formato</th><th>Tamaño</th></tr>${attachmentRows}</table><p class="small">La vista previa conserva saltos, páginas y estructuras compatibles para revisión. El cálculo usa texto extraído; no afirma conservar de forma idéntica fuentes, imágenes, columnas o posicionamiento del archivo original.</p></div>
+      <div class="report-section"><h2>4. Tarifas y cálculo</h2><table><tr><th>Concepto</th><th>Volumen por llamada</th><th>Tarifa USD</th><th>Costo USD/llamada</th><th>Participación</th></tr><tr><td>Entrada no almacenada</td><td>${fmtNum(r.uncached)} tokens</td><td>$${r.pin}/1M</td><td>$${r.cIn.toFixed(6)}*</td><td>${fmtNum(inShare,1)}%</td></tr><tr><td>Salida</td><td>${fmtNum(r.outTotal)} tokens</td><td>$${r.pout}/1M</td><td>$${r.cOut.toFixed(6)}</td><td>${fmtNum(outShare,1)}%</td></tr><tr><td>Cargo fijo</td><td>1 llamada</td><td>$${r.fixed}</td><td>$${r.cFixed.toFixed(6)}</td><td>${fmtNum(fixedShare,1)}%</td></tr><tr><td><b>Total</b></td><td>—</td><td>—</td><td><b>$${r.perCall.toFixed(6)}</b></td><td>100%</td></tr></table><p class="small">*El costo de entrada incluye ${fmtNum(r.cached)} tokens en caché a $${r.pcache}/1M cuando se configuró caché.</p><pre>${esc($('formula').textContent)}</pre></div>
+      <div class="report-section"><h2>5. Moneda y tipo de cambio</h2><p>${esc(fxText)}</p><p>Los precios del catálogo se almacenan en USD. La conversión solo cambia la moneda de presentación; no altera el costo base del proveedor. La fecha y las unidades deben verificarse antes de enviar una cotización.</p></div>
+      <div class="report-section"><h2>6. Sensibilidad por volumen</h2><p>La siguiente tabla mantiene constantes tokens, tarifas, modelo y tipo de cambio; únicamente cambia el número de llamadas. Por ello, muestra sensibilidad lineal y no incluye descuentos por volumen.</p><table><tr><th>Llamadas</th><th>Costo base</th><th>Con ${r.cont}% de contingencia</th></tr>${scales}</table></div>
+      <div class="report-section"><h2>7. Recomendaciones para el proyecto</h2><ol>${recs}</ol><p><b>Recomendación de decisión:</b> ejecutar un piloto representativo, medir costo por tarea correctamente resuelta y comparar al menos dos modelos. El menor precio por token no garantiza el menor costo por resultado útil.</p></div>
+      <div class="report-section"><h2>8. Comparación matemática de modelos</h2><p>Todos los modelos siguientes usan el mismo volumen estimado. La tabla compara costo, no calidad, latencia, privacidad, disponibilidad ni cumplimiento.</p><table><thead><tr><th>Modelo</th><th>Proveedor</th><th>Proyecto</th><th>Diferencia vs. elegido</th></tr></thead><tbody>${comparisons}</tbody></table></div>
+      <div class="report-section"><h2>9. Plan sugerido de implementación y control</h2><ol><li><b>Piloto:</b> probar una muestra de solicitudes reales y registrar tokens, costo, tiempo y resultado.</li><li><b>Validación:</b> definir criterios de éxito apropiados al proyecto —exactitud, tono, formato, cobertura y seguridad— y compararlos por modelo.</li><li><b>Automatización:</b> enrutar tareas simples al modelo validado de menor costo y escalar casos complejos o riesgosos.</li><li><b>Monitoreo:</b> revisar semanalmente costo por tarea exitosa, tokens de salida, errores y desviación contra presupuesto.</li></ol><p><b>Responsable sugerido:</b> por definir por la organización. <b>Indicador principal:</b> costo total por tarea correctamente completada.</p></div>
+      <div class="report-section"><h2>10. Supuestos, exclusiones y alertas</h2><div class="alert">${esc($('resultWarnings').textContent)}</div><ul><li>Las tarifas corresponden al catálogo consultado el ${PRICE_DATE} y son editables.</li><li>No se mezclan planes de suscripción con precios de API.</li><li>Se excluyen impuestos, descuentos, lotes, procesamiento regional, almacenamiento, herramientas, búsqueda, audio, imagen y otros cargos no capturados.</li><li>Una inferencia de ahorro por cambiar de modelo debe confirmarse mediante evaluación de calidad y tasa de éxito.</li></ul></div>
+      <div class="report-section"><h2>11. Fuentes</h2><p>Tarifas: GPT for Work, LLM API Pricing Calculator, consulta ${PRICE_DATE}. Tipo de cambio: Banco de México, API REST del SIE; serie SF43718 y, cuando corresponde, ${currencySeries[r.currency].series||'sin serie adicional'}. Tokenización: medición declarada por la persona usuaria o supuesto visible de caracteres por token.</p></div><div class="footer">Tokeniza·IA · Reporte de estimación y recomendaciones · © Wendy Miranda</div>`;
+    }
+    function reportStyles(){return `body{font-family:Arial,sans-serif;color:#263247;margin:38px;line-height:1.55;background:#fffaf2}h1{color:#7b5b75;margin:4px 0}h2{margin-top:30px;border-bottom:4px solid #CDB4DB;padding-bottom:6px;color:#4e4358}h3{color:#6d5060}table{border-collapse:collapse;width:100%;font-size:12px;margin:12px 0}th,td{border:1px solid #d9c8ba;padding:8px;text-align:left;vertical-align:top}th{background:#F6D8C6}.report-cover{background:linear-gradient(135deg,#FFE6D1,#F5D4E2);border-left:9px solid #F6B6C8;padding:24px}.report-kicker{font-size:10px;letter-spacing:.15em;font-weight:bold}.summary td{background:#FFF2DE;font-size:15px}.small{color:#657083;font-size:11px}.alert{background:#FFF1C7;border-left:5px solid #E5B95F;padding:13px}.report-section{page-break-inside:auto}.footer{margin-top:35px;border-top:1px solid #d9c8ba;padding-top:12px;font-size:11px;color:#657083}pre{white-space:pre-wrap;background:#F2E3D5;padding:12px;border-radius:8px;font-size:11px}`;}
+    function reportHTML(){const body=reportBodyHTML();if(!body)return null;return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cotización ${esc(els.projectName.value)}</title><style>${reportStyles()}</style></head><body>${body}</body></html>`;}
+    function downloadBlob(content,type,name){const blob=new Blob([content],{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);}
+    function exportDoc(){const html=reportHTML();if(!html)return;downloadBlob('\ufeff'+html,'application/msword',`Cotizacion_${safeName(els.projectName.value)}.doc`);toast('Reporte Word ampliado descargado.');}
+    function safeName(s){return (s||'Proyecto').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9_-]+/gi,'_').replace(/^_+|_+$/g,'').slice(0,60)||'Proyecto';}
+    function exportPdf(){const body=reportBodyHTML();if(!body)return;const target=$('printReport');target.innerHTML=`<style>${reportStyles()}</style>${body}`;target.setAttribute('aria-hidden','false');window.print();setTimeout(()=>target.setAttribute('aria-hidden','true'),500);}
+    function exportReportHtml(){const html=reportHTML();if(!html)return;downloadBlob(html,'text/html;charset=utf-8',`Reporte_${safeName(els.projectName.value)}.html`);toast('Reporte HTML listo para compartir.');}
+    function downloadCalculator(){const clone=document.documentElement.cloneNode(true);const token=clone.querySelector('#banxicoToken');if(token){token.removeAttribute('value');token.setAttribute('placeholder','Pega tu token de Banxico (no se guarda ni se exporta)');}clone.querySelectorAll('.file-list,.file-preview').forEach(x=>x.innerHTML='');clone.querySelectorAll('#inputPreviewWrap,#outputPreviewWrap').forEach(x=>x.setAttribute('hidden',''));const report=clone.querySelector('#printReport');if(report)report.innerHTML='';const fileStatus=clone.querySelector('#fileStatus');if(fileStatus)fileStatus.textContent='';const banxicoStatus=clone.querySelector('#banxicoStatus');if(banxicoStatus)banxicoStatus.textContent='';downloadBlob('<!doctype html>\n'+clone.outerHTML,'text/html;charset=utf-8','Tokeniza_IA_Cotizador_Proyectos.html');toast('Calculadora limpia descargada; no incluye archivos ni token de Banxico.');}
+    function resetAll(){if(!confirm('¿Reiniciar la calculadora y borrar textos, archivos y resultados?'))return;inputAttachments=[];outputAttachments=[];document.querySelectorAll('input').forEach(i=>{if(['button','file'].includes(i.type))return;i.value=''});els.projectName.value='Proyecto de atención al cliente';els.calls.value=1000;els.contingency.value=10;els.ratio.value=4;els.overhead.value=0;els.cachePct.value=0;els.inputText.value='';els.outputText.value='';els.currency.value='MXN';els.provider.value='OpenAI';renderModels('OpenAI');els.modelSelect.value=2;setModel();renderFiles('input');renderFiles('output');updateCurrencyUI();lastResult=null;$('grandTotal').textContent='—';$('grandSub').textContent='Completa los datos y calcula';['perCall','withContingency','resultInputTokens','resultOutputTokens'].forEach(x=>$(x).textContent='—');$('recommendations').innerHTML=rec('i','Aún no hay recomendación','Calcula el proyecto para generar un reporte contextual.');$('comparisonBody').innerHTML='<tr><td colspan="4">Sin cálculo disponible.</td></tr>';live(false);toast('Calculadora reiniciada.');}
+
+    els.provider.addEventListener('change',()=>renderModels(els.provider.value));els.modelSelect.addEventListener('change',setModel);
+    ['inputText','outputText','ratio','manualInput','manualOutput','overhead','cachePct'].forEach(k=>els[k].addEventListener('input',()=>live(true)));
+    ['calls','contingency','inputPrice','outputPrice','cachePrice','fixedPrice','exchangeRate','targetExchangeRate','exchangeDate','projectType','role','priority'].forEach(k=>els[k].addEventListener('change',()=>lastResult&&calculate(false)));
+    els.currency.addEventListener('change',()=>{updateCurrencyUI();if(lastResult)calculate(false);});
+    $('calculate').addEventListener('click',()=>calculate(true));$('fetchBanxico').addEventListener('click',fetchBanxico);$('useManualRate').addEventListener('click',()=>{const code=els.currency.value,ok=code==='USD'||(n(els.exchangeRate.value)>0&&(['USD','MXN'].includes(code)||n(els.targetExchangeRate.value)>0));if(ok){$('banxicoStatus').textContent=`Valores manuales aplicados para ${code} · ${els.exchangeDate.value||'fecha no indicada'}.`;lastResult&&calculate(false)}else toast('Captura todos los tipos de cambio requeridos.');});
+    $('exportDoc').addEventListener('click',exportDoc);$('exportPdf').addEventListener('click',exportPdf);$('exportReportHtml').addEventListener('click',exportReportHtml);$('downloadCalculator').addEventListener('click',downloadCalculator);$('resetAll').addEventListener('click',resetAll);
+    document.addEventListener('click',e=>{const b=e.target.closest('[data-remove]');if(!b)return;const arr=b.dataset.kind==='input'?inputAttachments:outputAttachments;arr.splice(Number(b.dataset.remove),1);renderFiles(b.dataset.kind);live(true);});
+    wireDrop('input');wireDrop('output');initModels();updateCurrencyUI();live(false);
+  })();
+  </script>
+</body>
+</html>
